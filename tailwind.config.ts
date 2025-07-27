@@ -8,6 +8,13 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      // Add the new font families here
+      fontFamily: {
+        // This will be our "Hatton" replacement
+        serif: ['var(--font-playfair-display)'],
+        // This will be our "Quiche" replacement
+        sans: ['var(--font-cormorant-garamond)'],
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
