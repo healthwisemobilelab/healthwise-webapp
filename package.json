@@ -9,10 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@paypal/react-paypal-js": "^8.8.3",
+    "@types/nodemailer": "^6.4.17",
     "@types/react-datepicker": "^6.2.0",
     "autoprefixer": "^10.4.21",
     "googleapis": "^140.0.1",
     "next": "14.2.5",
+    "nodemailer": "^7.0.5",
     "react": "^18",
     "react-datepicker": "^7.3.0",
     "react-dom": "^18",

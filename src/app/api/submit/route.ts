@@ -18,16 +18,25 @@ export async function POST(request: NextRequest) {
 
     const sheets = google.sheets({ auth, version: 'v4' });
 
+    const currentData = await sheets.spreadsheets.values.get({
+        spreadsheetId: process.env.GOOGLE_SHEET_ID,
+        range: 'A:A',
+    });
+    const lastRow = currentData.data.values ? currentData.data.values.length : 0;
+    const newRowIndex = lastRow + 1;
+
+    // This newRow now includes all the detailed patient information
     const newRow = [
       new Date().toLocaleString('en-US', { timeZone: 'America/Nassau' }),
-      body.name,
-      body.phone,
-      body.email,
-      body.address,
-      body.service,
-      body.requestedDate,
-      'Pending',
-      '',
+      body.name, body.phone, body.email, body.address,
+      body.service, body.requestedDate, 'Pending',
+      body.specialInstructions || '', 
+      '', '', // PhysicianInfo, VisitNotes (initially blank)
+      body.dateOfBirth || '', 
+      body.nationalInsurance || '',
+      body.maritalStatus || '', 
+      body.occupation || '',
+      '', // RequisitionFileLink (initially blank)
     ];
 
     await sheets.spreadsheets.values.append({
@@ -39,7 +48,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ message: 'Success! Appointment requested.' }, { status: 200 });
+    return NextResponse.json({ 
+        message: 'Success! Appointment requested.',
+        rowIndex: newRowIndex 
+    }, { status: 200 });
 
   } catch (error) {
     console.error(error);

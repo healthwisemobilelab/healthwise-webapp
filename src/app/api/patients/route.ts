@@ -1,4 +1,4 @@
-// src/app/api/appointments/route.ts
+// src/app/api/patients/route.ts
 import { google } from 'googleapis';
 import { NextResponse } from 'next/server';
 
@@ -18,32 +18,26 @@ export async function GET() {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: 'A2:P', // Read data up to column P
+      range: 'A2:O', // Read all data
     });
 
     const rows = response.data.values || [];
 
-    const appointments = rows.map((row, index) => ({
-      rowIndex: index + 2,
-      timestamp: row[0] || '',
-      name: row[1] || '',
-      phone: row[2] || '',
-      email: row[3] || '',
-      address: row[4] || '',
-      service: row[5] || '',
-      requestedDate: row[6] || '',
-      status: row[7] || '',
-      specialInstructions: row[8] || '',
-      physicianInfo: row[9] || '',
-      visitNotes: row[10] || '',
-      dateOfBirth: row[11] || '',
-      nationalInsurance: row[12] || '',
-      maritalStatus: row[13] || '',
-      occupation: row[14] || '',
-      requisitionFileLink: row[15] || '', // Read the new file link column
-    }));
+    const uniquePatients: { [key: string]: any } = {};
+    rows.forEach(row => {
+      const email = row[3];
+      if (email) {
+        // Always update with the latest info for that patient
+        uniquePatients[email] = {
+          name: row[1], phone: row[2], email: row[3], address: row[4],
+          dateOfBirth: row[11] || 'N/A', nationalInsurance: row[12] || 'N/A',
+          maritalStatus: row[13] || 'N/A', occupation: row[14] || 'N/A',
+        };
+      }
+    });
 
-    return NextResponse.json(appointments);
+    const patientList = Object.values(uniquePatients);
+    return NextResponse.json(patientList);
 
   } catch (error) {
     console.error(error);

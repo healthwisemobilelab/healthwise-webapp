@@ -2,8 +2,22 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Slide } from 'react-slideshow-image';
+import 'react-slideshow-image/dist/styles.css';
 import Image from 'next/image';
+
+// --- Your Slideshow Images ---
+const initialSlideImages = [
+  { url: '/slide-1.jpg' },
+  { url: '/slide-2.jpg' },
+  { url: '/slide-3.jpg' },
+  { url: '/slide-4.jpg' },
+  { url: '/slide-5.jpg' },
+  { url: '/slide-6.jpg' },
+  { url: '/slide-7.jpg' },
+  { url: '/slide-8.jpg' },
+];
 
 const FaqItem = ({ question, answer }: { question: string, answer: string }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,35 +36,56 @@ const FaqItem = ({ question, answer }: { question: string, answer: string }) => 
 };
 
 export default function HomePage() {
+  const [shuffledSlides, setShuffledSlides] = useState<typeof initialSlideImages>([]);
+
+  // This effect runs once on the client to shuffle the images
+  useEffect(() => {
+    setShuffledSlides([...initialSlideImages].sort(() => Math.random() - 0.5));
+  }, []);
+
   return (
     <>
-      {/* Hero Section with Watermark/Backdrop */}
-      {/* The bottom padding has been increased to make the section taller */}
-      <section className="bg-teal-600 text-white pt-20 pb-48 px-4 relative overflow-hidden">
-        {/* The Watermark Image (Layer 1) */}
+      {/* Slideshow returned to original size, borders removed */}
+      <section className="relative h-96 w-full">
+        {shuffledSlides.length > 0 && (
+          <Slide duration={4000} transitionDuration={1000} indicators={true} arrows={false}>
+            {shuffledSlides.map((slideImage, index) => (
+              <div key={index} className="relative h-96 w-full">
+                <Image
+                  src={slideImage.url}
+                  alt={`Promotional image ${index + 1}`}
+                  layout="fill"
+                  objectFit="fill" // Stretches the image to fit the container
+                  quality={90}
+                  priority={index < 2}
+                  onError={(e) => { e.currentTarget.src = 'https://placehold.co/1920x384/0f766e/ffffff?text=Image+Not+Found'; e.currentTarget.onerror = null; }}
+                />
+              </div>
+            ))}
+          </Slide>
+        )}
+      </section>
+
+      {/* Relocated Hero Section with Watermark */}
+      <section className="bg-teal-600 text-white py-32 px-4 relative overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center z-0">
           <Image
             src="/logo-secondary.png"
             alt="Health Wise Logo Backdrop"
             width={500}
             height={500}
-            className="opacity-10 relative top-12" // Moved the logo up
-            priority
+            className="opacity-10 relative top-12"
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
         </div>
-
-        {/* The Text Content (Layer 2) */}
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <h1 className="text-4xl md:text-5xl font-serif font-bold tracking-tight">
-            {/* The "whitespace-nowrap" class prevents the line from breaking */}
             <span className="whitespace-nowrap">Compassionate Phlebotomy Services</span>
             <span className="block">At Your Convenience</span>
           </h1>
           <p className="mt-6 text-lg md:text-xl text-teal-100 font-sans max-w-2xl mx-auto">
             Health Wise offers professional, private, and comfortable lab sample collection services brought directly to your doorstep in Nassau.
           </p>
-          {/* The button remains removed, but the space is preserved */}
         </div>
       </section>
 
