@@ -18,7 +18,7 @@ export async function GET() {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: 'A2:P', // Read data up to column P
+      range: 'A2:R', // Read data up to the new column R
     });
 
     const rows = response.data.values || [];
@@ -40,7 +40,9 @@ export async function GET() {
       nationalInsurance: row[12] || '',
       maritalStatus: row[13] || '',
       occupation: row[14] || '',
-      requisitionFileLink: row[15] || '', // Read the new file link column
+      requisitionFileLink: row[15] || '',
+      paymentStatus: row[16] || 'N/A',
+      depositStatus: row[17] || '', // Read the new DepositStatus column
     }));
 
     return NextResponse.json(appointments);

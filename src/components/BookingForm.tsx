@@ -35,6 +35,7 @@ export default function BookingForm({ onClose, setBookingMessage }: BookingFormP
   const [selectedTime, setSelectedTime] = useState('');
   const [requisitionFile, setRequisitionFile] = useState<File | null>(null);
   const [formError, setFormError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const selectedServicePrice = useMemo(() => servicesWithPrices[formData.service] || 0, [formData.service]);
 
@@ -49,10 +50,10 @@ export default function BookingForm({ onClose, setBookingMessage }: BookingFormP
     }
   };
 
-  const saveAppointment = async (paymentDetails: any) => {
+  const saveAppointmentAndSendEmail = async (paymentStatus: string, paymentDetails?: any) => {
     const formattedDate = selectedDate!.toLocaleDateString('en-US', { dateStyle: 'long' });
     const requestedDate = `${formattedDate} at ${selectedTime}`;
-    const submissionData = { ...formData, requestedDate, paymentDetails };
+    const submissionData = { ...formData, requestedDate, paymentStatus, paymentDetails };
 
     try {
       const submitResponse = await fetch('/api/submit', {
@@ -73,11 +74,41 @@ export default function BookingForm({ onClose, setBookingMessage }: BookingFormP
           body: fileFormData,
         });
       }
+      
+      // After saving, send the new confirmation email
+      await fetch('/api/send-booking-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            patientEmail: formData.email, 
+            patientName: formData.name,
+            service: formData.service,
+            requestedDate: requestedDate,
+            paymentStatus: paymentStatus
+        }),
+      });
+
       return true;
     } catch (error) {
-      console.error("Error saving appointment:", error);
+      console.error("Error in save/email process:", error);
       return false;
     }
+  };
+
+  const handlePayInPerson = async () => {
+      if (!formData.name || !selectedDate || !selectedTime) {
+        setFormError('Please fill out all patient and appointment details before submitting.');
+        return;
+      }
+      setIsLoading(true);
+      const success = await saveAppointmentAndSendEmail('Deposit Required (Pay In Person)');
+      if (success) {
+        setBookingMessage('✅ Your request is submitted! Please check your email for details and deposit instructions.');
+        setTimeout(onClose, 6000);
+      } else {
+        setFormError('There was an issue saving your appointment. Please try again.');
+      }
+      setIsLoading(false);
   };
 
   return (
@@ -149,22 +180,18 @@ export default function BookingForm({ onClose, setBookingMessage }: BookingFormP
               {formError && <p className="text-red-500 text-center mt-4">{formError}</p>}
 
               <div className="mt-6">
+                <p className="text-center text-sm text-gray-500 mb-2">Pay securely online:</p>
                 <PayPalButtons
                   style={{ layout: "vertical" }}
                   disabled={!formData.service || !selectedDate || !selectedTime}
                   createOrder={async (data: CreateOrderData, actions: CreateOrderActions) => {
                     setFormError('');
-                    if (!formData.service || !selectedDate || !selectedTime) {
+                    if (!formData.name || !selectedDate || !selectedTime) {
                       setFormError('Please fill out all patient and appointment details before proceeding to payment.');
                       return '';
                     }
                     return actions.order.create({
                       intent: "CAPTURE",
-                      payer: {
-                        address: {
-                          country_code: "BS" // Set the default country to The Bahamas
-                        }
-                      },
                       purchase_units: [{
                         description: `Payment for ${formData.service}`,
                         amount: {
@@ -180,10 +207,10 @@ export default function BookingForm({ onClose, setBookingMessage }: BookingFormP
                   onApprove={async (data: OnApproveData, actions: OnApproveActions) => {
                     const order = await actions.order?.capture();
                     if (order) {
-                      const success = await saveAppointment(order);
+                      const success = await saveAppointmentAndSendEmail('Paid Online via PayPal', order);
                       if (success) {
-                        setBookingMessage('✅ Success! Your appointment is confirmed.');
-                        setTimeout(onClose, 2000);
+                        setBookingMessage('✅ Success! Your appointment is confirmed. Please check your email.');
+                        setTimeout(onClose, 4000);
                       } else {
                         setFormError('There was an issue saving your appointment after payment. Please contact us.');
                       }
@@ -194,6 +221,15 @@ export default function BookingForm({ onClose, setBookingMessage }: BookingFormP
                     setFormError("An error occurred with the payment. Please try again.");
                   }}
                 />
+                <p className="text-center text-sm text-gray-500 my-4">OR</p>
+                <button 
+                    type="button" 
+                    onClick={handlePayInPerson} 
+                    disabled={isLoading || !formData.service || !selectedDate || !selectedTime}
+                    className="w-full px-6 py-3 bg-gray-600 text-white font-bold rounded-lg shadow-lg hover:bg-gray-700 disabled:bg-gray-300"
+                >
+                    {isLoading ? 'Submitting...' : 'Request to Pay In Person (Deposit Required)'}
+                </button>
               </div>
             </section>
           </div>

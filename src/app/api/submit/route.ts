@@ -25,18 +25,18 @@ export async function POST(request: NextRequest) {
     const lastRow = currentData.data.values ? currentData.data.values.length : 0;
     const newRowIndex = lastRow + 1;
 
-    // This newRow now includes all the detailed patient information
     const newRow = [
       new Date().toLocaleString('en-US', { timeZone: 'America/Nassau' }),
       body.name, body.phone, body.email, body.address,
       body.service, body.requestedDate, 'Pending',
       body.specialInstructions || '', 
-      '', '', // PhysicianInfo, VisitNotes (initially blank)
+      '', '', // PhysicianInfo, VisitNotes
       body.dateOfBirth || '', 
       body.nationalInsurance || '',
       body.maritalStatus || '', 
       body.occupation || '',
-      '', // RequisitionFileLink (initially blank)
+      '', // RequisitionFileLink
+      body.paymentStatus || 'N/A', // The new PaymentStatus field
     ];
 
     await sheets.spreadsheets.values.append({

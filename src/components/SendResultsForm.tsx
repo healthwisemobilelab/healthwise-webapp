@@ -12,9 +12,10 @@ type Patient = {
 type SendResultsFormProps = {
   patient: Patient;
   onClose: () => void;
+  logAction: (action: string, details: string) => Promise<void>; // Prop to receive the logging function
 };
 
-export default function SendResultsForm({ patient, onClose }: SendResultsFormProps) {
+export default function SendResultsForm({ patient, onClose, logAction }: SendResultsFormProps) {
   const [doctorEmail, setDoctorEmail] = useState('');
   const [message, setMessage] = useState(
     `Dear ${patient.name},\n\nPlease find your attached lab results from your recent visit.\n\nThank you for choosing Health Wise Mobile Phlebotomy.\n\nSincerely,\nThe Health Wise Team`
@@ -47,12 +48,15 @@ export default function SendResultsForm({ patient, onClose }: SendResultsFormPro
     try {
       const response = await fetch('/api/send-results', {
         method: 'POST',
-        body: formData, // We use FormData for file uploads
+        body: formData,
       });
 
       if (!response.ok) {
         throw new Error('Failed to send email.');
       }
+
+      // Log the action after a successful send
+      await logAction('Sent Lab Results', `Sent results to ${patient.name} (${patient.email})`);
 
       setStatusMessage('Success! Email has been sent.');
       setTimeout(() => {
