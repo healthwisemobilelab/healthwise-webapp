@@ -12,7 +12,7 @@ type Patient = {
 type SendResultsFormProps = {
   patient: Patient;
   onClose: () => void;
-  logAction: (action: string, details: string) => Promise<void>; // Prop to receive the logging function
+  logAction: (action: string, details: string) => Promise<void>;
 };
 
 export default function SendResultsForm({ patient, onClose, logAction }: SendResultsFormProps) {
@@ -73,9 +73,9 @@ export default function SendResultsForm({ patient, onClose, logAction }: SendRes
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-      <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg relative">
+      <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-lg relative font-sans">
         <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"><FaTimes /></button>
-        <h2 className="text-2xl font-bold mb-6 text-sky-800">Send Lab Results to {patient.name}</h2>
+        <h2 className="text-2xl font-bold mb-6 text-sky-800 font-serif">Send Lab Results to {patient.name}</h2>
         
         <div className="space-y-4">
           <div>
