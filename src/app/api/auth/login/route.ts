@@ -1,21 +1,23 @@
-// src/app/api/auth/login/route.ts
 import { google } from 'googleapis';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
+    // Get email and password from request body
     const { email, password } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json({ message: 'Missing email or password' }, { status: 400 });
     }
 
+    // Parse Google credentials from environment variable
     const credentialsJson = process.env.GOOGLE_CREDENTIALS_JSON;
     if (!credentialsJson) {
-        throw new Error("Missing GOOGLE_CREDENTIALS_JSON in environment variables.");
+      throw new Error("Missing GOOGLE_CREDENTIALS_JSON in environment variables.");
     }
     const credentials = JSON.parse(credentialsJson);
 
+    // Authenticate with Google Sheets API (readonly access)
     const auth = new google.auth.GoogleAuth({
       credentials,
       scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
@@ -23,27 +25,28 @@ export async function POST(request: NextRequest) {
 
     const sheets = google.sheets({ auth, version: 'v4' });
 
-    // Read the 'Users' sheet
+    // Read users from 'Users' sheet, skipping header row
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: 'Users!A2:C', // Read from the Users sheet, skipping the header
+      range: 'Users!A2:C',
     });
 
     const users = response.data.values || [];
 
-    // Find a user that matches the provided email and password
+    // Find user matching email and password
     const user = users.find(row => 
-        row[0] && row[1] &&
-        row[0].trim().toLowerCase() === email.trim().toLowerCase() && 
-        row[1].trim() === password.trim()
+      row[0] && row[1] &&
+      row[0].trim().toLowerCase() === email.trim().toLowerCase() &&
+      row[1].trim() === password.trim()
     );
 
     if (user) {
-      // If a user is found, return their email and role
-      const userRole = user[2]; // Role is in the 3rd column (index 2)
-      return NextResponse.json({ success: true, user: { email: user[0], role: userRole } });
+      // Return user email and role if found
+      return NextResponse.json({
+        success: true,
+        user: { email: user[0], role: user[2] || 'Staff' }
+      });
     } else {
-      // If no match is found, return an error
       return NextResponse.json({ success: false, message: 'Invalid email or password' }, { status: 401 });
     }
 
