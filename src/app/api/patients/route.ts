@@ -21,25 +21,19 @@ export async function GET() {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: 'A2:O', // Read all potential columns for patient data
+      range: 'A2:O',
     });
 
     const rows = response.data.values || [];
 
     const uniquePatients: { [key: string]: any } = {};
     rows.forEach(row => {
-      // Ensure the row is not empty and has a name (column B, index 1)
       if (row && row[1]) {
-        const email = row[3] || `${row[1]}-no-email`; // Use email as key, or name if email is missing
-        // This will always store the latest information found for that patient
+        const email = row[3] || `${row[1]}-no-email`;
         uniquePatients[email] = {
-          name: row[1], 
-          phone: row[2] || 'N/A', 
-          email: row[3] || 'N/A', 
-          address: row[4] || 'N/A',
-          dateOfBirth: row[11] || 'N/A', 
-          nationalInsurance: row[12] || 'N/A',
-          maritalStatus: row[13] || 'N/A', 
+          name: row[1], phone: row[2] || 'N/A', email: row[3] || 'N/A', 
+          address: row[4] || 'N/A', dateOfBirth: row[11] || 'N/A', 
+          nationalInsurance: row[12] || 'N/A', maritalStatus: row[13] || 'N/A', 
           occupation: row[14] || 'N/A',
         };
       }

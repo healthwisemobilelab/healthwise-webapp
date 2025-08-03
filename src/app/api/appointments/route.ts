@@ -21,31 +21,19 @@ export async function GET() {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: 'A2:R', // Read data up to the new column R
+      range: 'A2:R',
     });
 
     const rows = response.data.values || [];
 
     const appointments = rows.map((row, index) => ({
       rowIndex: index + 2,
-      timestamp: row[0] || '',
-      name: row[1] || '',
-      phone: row[2] || '',
-      email: row[3] || '',
-      address: row[4] || '',
-      service: row[5] || '',
-      requestedDate: row[6] || '',
-      status: row[7] || '',
-      specialInstructions: row[8] || '',
-      physicianInfo: row[9] || '',
-      visitNotes: row[10] || '',
-      dateOfBirth: row[11] || '',
-      nationalInsurance: row[12] || '',
-      maritalStatus: row[13] || '',
-      occupation: row[14] || '',
-      requisitionFileLink: row[15] || '',
-      paymentStatus: row[16] || 'N/A',
-      depositStatus: row[17] || '', 
+      timestamp: row[0] || '', name: row[1] || '', phone: row[2] || '',
+      email: row[3] || '', address: row[4] || '', service: row[5] || '',
+      requestedDate: row[6] || '', status: row[7] || '', specialInstructions: row[8] || '',
+      physicianInfo: row[9] || '', visitNotes: row[10] || '', dateOfBirth: row[11] || '',
+      nationalInsurance: row[12] || '', maritalStatus: row[13] || '', occupation: row[14] || '',
+      requisitionFileLink: row[15] || '', paymentStatus: row[16] || 'N/A', depositStatus: row[17] || '', 
     }));
 
     return NextResponse.json(appointments);
