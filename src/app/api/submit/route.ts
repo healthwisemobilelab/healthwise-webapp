@@ -8,6 +8,7 @@ export async function POST(request: NextRequest) {
 
     const credentials = {
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      // THIS IS THE FIX: It correctly formats the key from Vercel
       private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
     };
 
@@ -36,7 +37,8 @@ export async function POST(request: NextRequest) {
       body.maritalStatus || '', 
       body.occupation || '',
       '', // RequisitionFileLink
-      body.paymentStatus || 'N/A', // The new PaymentStatus field
+      body.paymentStatus || 'N/A',
+      '', // DepositStatus
     ];
 
     await sheets.spreadsheets.values.append({
@@ -53,9 +55,9 @@ export async function POST(request: NextRequest) {
         rowIndex: newRowIndex 
     }, { status: 200 });
 
-  } catch (error) {
-    console.error(error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+  } catch (error: any) {
+    console.error("--- SUBMIT API ERROR ---", error);
+    const errorMessage = error.message || 'Unknown error';
     return NextResponse.json({ message: 'Error submitting to sheet', error: errorMessage }, { status: 500 });
   }
 }
