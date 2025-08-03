@@ -6,12 +6,15 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // THIS IS THE FIX: Use the full JSON credentials, just like our other APIs.
-    const credentialsJson = process.env.GOOGLE_CREDENTIALS_JSON;
-    if (!credentialsJson) {
-        throw new Error("Missing GOOGLE_CREDENTIALS_JSON in environment variables.");
+    // THIS IS THE FIX: Use the separate keys and correctly format the private key.
+    const credentials = {
+      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    };
+
+    if (!credentials.client_email || !credentials.private_key) {
+        throw new Error("Missing Google Service Account credentials in .env.local file.");
     }
-    const credentials = JSON.parse(credentialsJson);
 
     const auth = new google.auth.GoogleAuth({
       credentials,
