@@ -6,11 +6,12 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const credentials = {
-      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      // THIS IS THE FIX: It correctly formats the key from Vercel
-      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    };
+    // THIS IS THE FIX: Use the full JSON credentials, just like our other APIs.
+    const credentialsJson = process.env.GOOGLE_CREDENTIALS_JSON;
+    if (!credentialsJson) {
+        throw new Error("Missing GOOGLE_CREDENTIALS_JSON in environment variables.");
+    }
+    const credentials = JSON.parse(credentialsJson);
 
     const auth = new google.auth.GoogleAuth({
       credentials,
@@ -19,6 +20,7 @@ export async function POST(request: NextRequest) {
 
     const sheets = google.sheets({ auth, version: 'v4' });
 
+    // Get the current data to find the last row
     const currentData = await sheets.spreadsheets.values.get({
         spreadsheetId: process.env.GOOGLE_SHEET_ID,
         range: 'A:A',
@@ -26,6 +28,7 @@ export async function POST(request: NextRequest) {
     const lastRow = currentData.data.values ? currentData.data.values.length : 0;
     const newRowIndex = lastRow + 1;
 
+    // Prepare the new row with all the latest fields
     const newRow = [
       new Date().toLocaleString('en-US', { timeZone: 'America/Nassau' }),
       body.name, body.phone, body.email, body.address,
@@ -41,6 +44,7 @@ export async function POST(request: NextRequest) {
       '', // DepositStatus
     ];
 
+    // Append the new row to the sheet
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
       range: 'A1',
@@ -50,6 +54,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Return a success response WITH the new row index
     return NextResponse.json({ 
         message: 'Success! Appointment requested.',
         rowIndex: newRowIndex 

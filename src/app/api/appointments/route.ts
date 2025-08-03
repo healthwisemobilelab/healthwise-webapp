@@ -2,12 +2,15 @@
 import { google } from 'googleapis';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
-    const credentials = {
-      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    };
+    const credentialsJson = process.env.GOOGLE_CREDENTIALS_JSON;
+    if (!credentialsJson) {
+        throw new Error("Missing GOOGLE_CREDENTIALS_JSON in environment variables.");
+    }
+    const credentials = JSON.parse(credentialsJson);
 
     const auth = new google.auth.GoogleAuth({
       credentials,
@@ -42,14 +45,14 @@ export async function GET() {
       occupation: row[14] || '',
       requisitionFileLink: row[15] || '',
       paymentStatus: row[16] || 'N/A',
-      depositStatus: row[17] || '', // Read the new DepositStatus column
+      depositStatus: row[17] || '', 
     }));
 
     return NextResponse.json(appointments);
 
   } catch (error) {
-    console.error(error);
+    console.error("Appointments API Error:", error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ message: 'Error fetching from sheet', error: errorMessage }, { status: 500 });
+    return NextResponse.json({ message: 'Error fetching appointments', error: errorMessage }, { status: 500 });
   }
 }

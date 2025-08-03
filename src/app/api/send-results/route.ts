@@ -4,6 +4,15 @@ import nodemailer from 'nodemailer';
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate email credentials
+    const emailUser = process.env.RESULTS_EMAIL;
+    const emailPass = process.env.RESULTS_EMAIL_APP_PASSWORD;
+
+    if (!emailUser || !emailPass) {
+        console.error("Missing email credentials in environment variables.");
+        throw new Error("Server configuration error: Missing email credentials.");
+    }
+
     const formData = await request.formData();
     const patientEmail = formData.get('patientEmail') as string;
     const doctorEmail = formData.get('doctorEmail') as string | null;
@@ -15,18 +24,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
 
-    // Create a transporter object using your Gmail App Password
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.RESULTS_EMAIL,
-        pass: process.env.RESULTS_EMAIL_APP_PASSWORD,
+        user: emailUser,
+        pass: emailPass,
       },
     });
 
-    // Prepare the email options
     const mailOptions: nodemailer.SendMailOptions = {
-      from: `"Health Wise Mobile Lab" <${process.env.RESULTS_EMAIL}>`,
+      from: `"Health Wise Mobile Lab" <${emailUser}>`,
       to: patientEmail,
       subject: subject,
       text: message,
@@ -39,18 +46,16 @@ export async function POST(request: NextRequest) {
       ],
     };
 
-    // Add the doctor's email to the CC list if it exists
     if (doctorEmail) {
       mailOptions.cc = doctorEmail;
     }
 
-    // Send the email
     await transporter.sendMail(mailOptions);
 
     return NextResponse.json({ message: 'Email sent successfully' });
 
   } catch (error) {
-    console.error(error);
+    console.error("Send Results API Error:", error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({ message: 'Error sending email', error: errorMessage }, { status: 500 });
   }
