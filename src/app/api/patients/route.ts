@@ -6,11 +6,15 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const credentialsJson = process.env.GOOGLE_CREDENTIALS_JSON;
-    if (!credentialsJson) {
-        throw new Error("Missing GOOGLE_CREDENTIALS_JSON in environment variables.");
+    // This is the corrected authentication method.
+    const credentials = {
+      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    };
+
+    if (!credentials.client_email || !credentials.private_key) {
+        throw new Error("Server configuration error: Missing Google Service Account credentials.");
     }
-    const credentials = JSON.parse(credentialsJson);
 
     const auth = new google.auth.GoogleAuth({
       credentials,
@@ -30,12 +34,18 @@ export async function GET() {
     rows.forEach(row => {
       // Ensure the row is not empty and has a name (column B, index 1)
       if (row && row[1]) {
-        const email = row[3] || `${row[1]}-no-email`; // Use email as key, or name if email is missing
+        // THIS IS THE FIX: Create a more robust unique key.
+        // It will use the email if present, otherwise it combines name and phone.
+        const email = row[3]?.trim();
+        const name = row[1]?.trim();
+        const phone = row[2]?.trim();
+        const uniqueKey = email || `${name}-${phone}`;
+
         // This will always store the latest information found for that patient
-        uniquePatients[email] = {
-          name: row[1], 
-          phone: row[2] || 'N/A', 
-          email: row[3] || 'N/A', 
+        uniquePatients[uniqueKey] = {
+          name: name || 'N/A', 
+          phone: phone || 'N/A', 
+          email: email || 'N/A', 
           address: row[4] || 'N/A',
           dateOfBirth: row[11] || 'N/A', 
           nationalInsurance: row[12] || 'N/A',
