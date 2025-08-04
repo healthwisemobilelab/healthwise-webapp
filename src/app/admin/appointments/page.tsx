@@ -13,10 +13,25 @@ type Appointment = {
   depositStatus: string;
 };
 
+// Define the structure for the logged-in user
+type User = {
+  email: string;
+  role: 'Admin' | 'Staff' | string;
+};
+
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    // Get the current user from session storage to include in API calls
+    const loggedInUserStr = sessionStorage.getItem('healthwiseUser');
+    if (loggedInUserStr) {
+      setUser(JSON.parse(loggedInUserStr));
+    }
+  }, []);
 
   const fetchAppointments = () => {
     setIsLoading(true);
@@ -28,7 +43,6 @@ export default function AppointmentsPage() {
         return res.json();
       })
       .then(data => {
-        // Add a check to ensure the data is an array before setting state
         if (Array.isArray(data)) {
             setAppointments(data);
         } else {
@@ -47,6 +61,20 @@ export default function AppointmentsPage() {
   useEffect(() => {
     fetchAppointments();
   }, []);
+
+  const handleAdminAction = async (actionType: string, payload: any) => {
+    await fetch('/api/admin-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actionType, payload, user }),
+    });
+    // After any action, refresh all data to ensure UI is in sync
+    fetchAppointments();
+  };
+
+  const handleStatusUpdate = async (rowIndex: number, newStatus: 'Confirmed' | 'Declined') => {
+    await handleAdminAction('UPDATE_STATUS', { rowIndex, newStatus });
+  };
 
   if (isLoading) {
     return <div>Loading appointments...</div>;
@@ -90,9 +118,18 @@ export default function AppointmentsPage() {
                 )}
               </td>
               <td className="py-3 px-4 space-x-2">
-                {/* These buttons are placeholders for now. We will make them functional next. */}
-                <button className="bg-green-500 hover:bg-green-600 text-white text-sm py-1 px-2 rounded">Confirm</button>
-                <button className="bg-red-500 hover:bg-red-600 text-white text-sm py-1 px-2 rounded">Decline</button>
+                <button 
+                  onClick={() => handleStatusUpdate(app.rowIndex, 'Confirmed')}
+                  className="bg-green-500 hover:bg-green-600 text-white text-sm py-1 px-2 rounded"
+                >
+                  Confirm
+                </button>
+                <button 
+                  onClick={() => handleStatusUpdate(app.rowIndex, 'Declined')}
+                  className="bg-red-500 hover:bg-red-600 text-white text-sm py-1 px-2 rounded"
+                >
+                  Decline
+                </button>
               </td>
             </tr>
           ))}

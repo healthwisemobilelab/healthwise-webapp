@@ -3,11 +3,15 @@ import { google } from 'googleapis';
 import { NextRequest, NextResponse } from 'next/server';
 
 async function getAuthenticatedSheetsClient() {
-    const credentialsJson = process.env.GOOGLE_CREDENTIALS_JSON;
-    if (!credentialsJson) {
-        throw new Error("Missing GOOGLE_CREDENTIALS_JSON in environment variables.");
+    // This is the corrected authentication method.
+    const credentials = {
+      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    };
+
+    if (!credentials.client_email || !credentials.private_key) {
+        throw new Error("Server configuration error: Missing Google Service Account credentials.");
     }
-    const credentials = JSON.parse(credentialsJson);
 
     const auth = new google.auth.GoogleAuth({
       credentials,
@@ -54,41 +58,7 @@ export async function POST(request: NextRequest) {
         await logAction(sheets, user.email, 'Updated Appointment Status', `Set status to ${payload.newStatus} for appointment row ${payload.rowIndex}`);
         break;
 
-      case 'UPDATE_DEPOSIT_STATUS':
-        await sheets.spreadsheets.values.update({
-          spreadsheetId: process.env.GOOGLE_SHEET_ID,
-          range: `R${payload.rowIndex}`,
-          valueInputOption: 'USER_ENTERED',
-          requestBody: { values: [['Paid']] },
-        });
-        await logAction(sheets, user.email, 'Updated Deposit Status', `Marked deposit as Paid for appointment row ${payload.rowIndex}`);
-        break;
-        
-      case 'SAVE_REPORT':
-        await sheets.spreadsheets.values.update({
-          spreadsheetId: process.env.GOOGLE_SHEET_ID,
-          range: `J${payload.rowIndex}:K${payload.rowIndex}`,
-          valueInputOption: 'USER_ENTERED',
-          requestBody: { values: [[payload.physicianInfo, payload.visitNotes]] },
-        });
-        await logAction(sheets, user.email, 'Saved Phlebotomist Report', `Saved report for appointment row ${payload.rowIndex}`);
-        break;
-
-      case 'SAVE_PATIENT_DETAILS':
-         const valuesToUpdate = [
-            payload.patientData.phone, payload.patientData.address, null, null, null, null, null, null,
-            payload.patientData.dateOfBirth, payload.patientData.nationalInsurance,
-            payload.patientData.maritalStatus, payload.patientData.occupation,
-        ];
-        await sheets.spreadsheets.values.update({
-          spreadsheetId: process.env.GOOGLE_SHEET_ID,
-          range: `C${payload.rowIndex}:P${payload.rowIndex}`,
-          valueInputOption: 'USER_ENTERED',
-          requestBody: { values: [valuesToUpdate] },
-        });
-        await logAction(sheets, user.email, 'Updated Patient Details', `Saved details for ${payload.patientData.name}`);
-        break;
-
+      // We will add other actions here in the future
       default:
         return NextResponse.json({ message: 'Invalid action type' }, { status: 400 });
     }

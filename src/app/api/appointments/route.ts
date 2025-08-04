@@ -6,11 +6,17 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const credentialsJson = process.env.GOOGLE_CREDENTIALS_JSON;
-    if (!credentialsJson) {
-        throw new Error("Missing GOOGLE_CREDENTIALS_JSON in environment variables.");
+    // This is the updated authentication method.
+    // It uses the two separate keys you have set up in Vercel.
+    const credentials = {
+      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    };
+
+    // This check ensures the server is reading your Vercel variables correctly.
+    if (!credentials.client_email || !credentials.private_key) {
+        throw new Error("Server configuration error: Missing GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY in environment variables.");
     }
-    const credentials = JSON.parse(credentialsJson);
 
     const auth = new google.auth.GoogleAuth({
       credentials,
