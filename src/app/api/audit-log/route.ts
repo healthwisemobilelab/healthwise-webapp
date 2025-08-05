@@ -6,16 +6,23 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const credentialsJson = process.env.GOOGLE_CREDENTIALS_JSON;
-    if (!credentialsJson) {
-        throw new Error("Missing GOOGLE_CREDENTIALS_JSON in environment variables.");
-    }
-    const credentials = JSON.parse(credentialsJson);
+    // --- MODIFICATION START ---
+    // 1. Check for your intended environment variables.
+    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY;
 
-    const auth = new google.auth.GoogleAuth({
-      credentials,
+    if (!serviceAccountEmail || !privateKey) {
+        throw new Error("Missing GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY in environment variables.");
+    }
+
+    // 2. Use JWT authentication with the service account email and private key.
+    // The private key needs its newline characters correctly formatted.
+    const auth = new google.auth.JWT({
+      email: serviceAccountEmail,
+      key: privateKey.replace(/\\n/g, '\n'), // This formatting is crucial
       scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
     });
+    // --- MODIFICATION END ---
 
     const sheets = google.sheets({ auth, version: 'v4' });
 
