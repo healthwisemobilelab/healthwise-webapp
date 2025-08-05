@@ -16,6 +16,7 @@
     "googleapis": "^140.0.1",
     "next": "14.2.5",
     "nodemailer": "^7.0.5",
+    "pdf-lib": "^1.17.1",
     "react": "^18",
     "react-datepicker": "^7.3.0",
     "react-dom": "^18",

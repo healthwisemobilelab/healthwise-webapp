@@ -3,7 +3,7 @@ import { google } from 'googleapis';
 import { NextRequest, NextResponse } from 'next/server';
 
 async function getAuthenticatedSheetsClient() {
-    // This is the corrected authentication method.
+    // This is the corrected authentication method for your localhost.
     const credentials = {
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
       private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
@@ -58,6 +58,16 @@ export async function POST(request: NextRequest) {
         await logAction(sheets, user.email, 'Updated Appointment Status', `Set status to ${payload.newStatus} for appointment row ${payload.rowIndex}`);
         break;
 
+      case 'UPDATE_DEPOSIT_STATUS':
+        await sheets.spreadsheets.values.update({
+          spreadsheetId: process.env.GOOGLE_SHEET_ID,
+          range: `R${payload.rowIndex}`,
+          valueInputOption: 'USER_ENTERED',
+          requestBody: { values: [[payload.newStatus]] },
+        });
+        await logAction(sheets, user.email, 'Updated Deposit Status', `Set deposit status to ${payload.newStatus} for appointment row ${payload.rowIndex}`);
+        break;
+        
       // We will add other actions here in the future
       default:
         return NextResponse.json({ message: 'Invalid action type' }, { status: 400 });
