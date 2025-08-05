@@ -15,7 +15,7 @@ export async function GET() {
 
     // This check ensures the server is reading your Vercel variables correctly.
     if (!credentials.client_email || !credentials.private_key) {
-        throw new Error("Server configuration error: Missing GOOGLE_SERVICE_ACCOUNT_EMAIL or GOOGLE_PRIVATE_KEY in environment variables.");
+        throw new Error("Server configuration error: Missing Google Service Account credentials.");
     }
 
     const auth = new google.auth.GoogleAuth({
@@ -27,7 +27,10 @@ export async function GET() {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: 'A2:R',
+      // --- FIX START ---
+      // Extended the range to column S to include the reportFileLink
+      range: 'A2:S',
+      // --- FIX END ---
     });
 
     const rows = response.data.values || [];
@@ -39,7 +42,11 @@ export async function GET() {
       requestedDate: row[6] || '', status: row[7] || '', specialInstructions: row[8] || '',
       physicianInfo: row[9] || '', visitNotes: row[10] || '', dateOfBirth: row[11] || '',
       nationalInsurance: row[12] || '', maritalStatus: row[13] || '', occupation: row[14] || '',
-      requisitionFileLink: row[15] || '', paymentStatus: row[16] || 'N/A', depositStatus: row[17] || '', 
+      requisitionFileLink: row[15] || '', paymentStatus: row[16] || 'N/A', depositStatus: row[17] || '',
+      // --- FIX START ---
+      // Added the reportFileLink from column S (index 18)
+      reportFileLink: row[18] || '',
+      // --- FIX END ---
     }));
 
     return NextResponse.json(appointments);
