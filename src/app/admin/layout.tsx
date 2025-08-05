@@ -92,7 +92,8 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
 
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
-            <Link href="/admin" className={`${pathname === '/admin' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700'} py-4 px-1 border-b-2 font-sans font-semibold`}>
+            {/* --- THIS IS THE FIX --- */}
+            <Link href="/admin/dashboard" className={`${pathname.startsWith('/admin/dashboard') ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700'} py-4 px-1 border-b-2 font-sans font-semibold`}>
                 Dashboard
             </Link>
             <Link href="/admin/appointments" className={`${pathname.startsWith('/admin/appointments') ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700'} py-4 px-1 border-b-2 font-sans font-semibold`}>
