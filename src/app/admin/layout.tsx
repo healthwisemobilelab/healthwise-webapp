@@ -1,7 +1,7 @@
 // src/app/admin/layout.tsx
 'use client';
 
-import '../globals.css'; // Corrected path to the globals.css file
+import '../globals.css';
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -21,7 +21,6 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Check session storage for a logged-in user
     const loggedInUserStr = sessionStorage.getItem('healthwiseUser');
     if (loggedInUserStr) {
       setUser(JSON.parse(loggedInUserStr));
@@ -79,7 +78,6 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
     );
   }
   
-  // If a user IS logged in, show the main dashboard layout
   return (
     <div className="p-4 md:p-8">
        <div className="flex justify-between items-center mb-6">
@@ -103,7 +101,11 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
             <Link href="/admin/patients" className={`${pathname.startsWith('/admin/patients') ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700'} py-4 px-1 border-b-2 font-sans font-semibold`}>
                 Patients
             </Link>
-            {/* We will add the other tabs here in the next steps */}
+            {user.role === 'Admin' && (
+                <Link href="/admin/audit-log" className={`${pathname.startsWith('/admin/audit-log') ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700'} py-4 px-1 border-b-2 font-sans font-semibold`}>
+                    Audit Log
+                </Link>
+            )}
         </nav>
       </div>
 
