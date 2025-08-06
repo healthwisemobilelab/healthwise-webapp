@@ -7,8 +7,9 @@ export default function Footer() {
       <div className="container mx-auto py-8 px-6">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="text-center md:text-left mb-4 md:mb-0">
-            <p className="font-bold text-lg">Health Wise Mobile Phlebotomy</p>
-            <p className="text-sm text-teal-100">"We bring the lab to you."</p>
+            {/* --- FIX: Reverted to two lines, both bold and uppercase --- */}
+            <p className="font-bold text-lg uppercase">Health Wise Mobile Phlebotomy Lab</p>
+            <p className="text-sm text-teal-100 uppercase font-bold">"We bring the lab to you."</p>
           </div>
           <div className="flex space-x-6">
             <Link href="/about" className="hover:text-yellow-300">About</Link>

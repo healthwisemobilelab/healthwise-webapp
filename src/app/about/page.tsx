@@ -11,8 +11,9 @@ export default function AboutPage() {
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-teal-700">
             Our Mission: Healthcare That Comes to You
           </h1>
+          {/* --- FIX: Updated mission statement text --- */}
           <p className="mt-4 text-lg text-gray-600 font-sans max-w-2xl mx-auto">
-            Health Wise was founded on a simple belief: accessing essential healthcare services should be convenient, comfortable, and compassionate.
+            Health Wise was founded on a simple belief: accessing essential healthcare services should be <span className="font-bold">CONVENIENT</span>, <span className="font-bold">CONFIDENTIAL</span>, <span className="font-bold">COMFORTABLE</span> and <span className="font-bold">COMPASSIONATE</span>.
           </p>
         </div>
       </div>
