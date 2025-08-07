@@ -9,9 +9,14 @@ const services = [
   { name: 'Full Blood Test Panels', description: 'Complete panels to provide a detailed overview of your health, from CBC to metabolic panels.', icon: <FaStethoscope /> },
   { name: 'Cholesterol Testing', description: 'Accurate lipid panel testing to monitor and manage cardiovascular health.', icon: <FaHeartbeat /> },
   { name: 'ECG', description: 'Electrocardiogram services to monitor your heart\'s electrical activity in a comfortable setting.', icon: <FaHeartbeat /> },
-  { name: 'COVID, HIV & STD Screening', description: 'Discreet and confidential screening for a range of infectious diseases.', icon: <FaLungs /> },
+  // --- FIX: Separated the screening services ---
+  { name: 'COVID Testing', description: 'Discreet and confidential screening for COVID-19.', icon: <FaLungs /> },
+  { name: 'HIV Testing', description: 'Discreet and confidential screening for HIV.', icon: <FaVenusMars /> },
+  { name: 'STD Screening', description: 'Discreet and confidential screening for a range of sexually transmitted diseases.', icon: <FaVenusMars /> },
   { name: 'HCG & Pregnancy Testing', description: 'Fast and reliable human chorionic gonadotropin (HCG) testing to confirm pregnancy.', icon: <FaVenusMars /> },
-  { name: 'Drug & Food Allergy Testing', description: 'Comprehensive sensitivity and allergy testing to identify triggers and improve your quality of life.', icon: <FaAllergies /> },
+  // --- FIX: Separated the allergy testing services ---
+  { name: 'Drug Testing', description: 'Comprehensive sensitivity and allergy testing for various substances.', icon: <FaAllergies /> },
+  { name: 'Food Allergy Testing', description: 'Identify food-related triggers and improve your quality of life.', icon: <FaAllergies /> },
 ];
 
 export default function ServicesPage() {

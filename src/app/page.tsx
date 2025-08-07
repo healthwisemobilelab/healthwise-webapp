@@ -76,6 +76,11 @@ export default function HomePage() {
                     priority={index < 2}
                     onError={(e) => { e.currentTarget.src = 'https://placehold.co/1920x500/0f766e/ffffff?text=Image+Not+Found'; e.currentTarget.onerror = null; }}
                   />
+                  {/* --- FIX: Added an overlay to soften the image edges --- */}
+                  <div 
+                    className="absolute inset-0" 
+                    style={{ boxShadow: 'inset 0 0 50px 40px #0d9488' }}
+                  ></div>
                 </div>
               ))}
             </Fade>

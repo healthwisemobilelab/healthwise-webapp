@@ -13,11 +13,23 @@ type BookingFormProps = {
   setBookingMessage: (message: string) => void;
 };
 
+// --- FIX: Updated the services list to match the services page ---
 const servicesWithPrices: { [key: string]: number } = {
-  'Routine Annual Blood Draw': 75, 'Full Blood Test Panels': 150, 'Prenatal Lab Testing': 120,
-  'Cholesterol Testing': 60, 'ECG': 100, 'HCG & Pregnancy Testing': 50, 'Blood Pressure Check': 25,
-  'Blood Glucose Test': 25, 'Blood Type Test': 40, 'COVID-19 Screening': 80, 'HIV Screening': 90,
-  'STD Screening': 110, 'Drug Allergy Testing': 180, 'Food Allergy Testing': 180, 'Other': 0,
+  'Routine Annual Blood Draw': 75, 
+  'Full Blood Test Panels': 150, 
+  'Prenatal Lab Testing': 120,
+  'Cholesterol Testing': 60, 
+  'ECG': 100, 
+  'HCG & Pregnancy Testing': 50, 
+  'Blood Pressure Check': 25,
+  'Blood Glucose Test': 25, 
+  'Blood Type Test': 40, 
+  'COVID Testing': 80, 
+  'HIV Testing': 90,
+  'STD Screening': 110, 
+  'Drug Testing': 180, 
+  'Food Allergy Testing': 180, 
+  'Other': 0,
 };
 
 const timeSlots = [

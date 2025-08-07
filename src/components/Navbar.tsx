@@ -11,7 +11,7 @@ export default function Navbar() {
       <div className="container mx-auto px-6 h-20 flex justify-between items-center">
         <Link href="/" className="h-full flex items-center">
           <Image 
-            src="/logo-secondary.png" 
+            src="/logo-primary.png" 
             alt="Health Wise Logo" 
             width={100} // Made the logo smaller
             height={25}  // Adjusted height to match
